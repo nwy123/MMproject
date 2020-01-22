@@ -9,7 +9,7 @@
       </div>
 
       <!-- 表单 -->
-      <el-form :model="loginForm" status-icon :rules="rules" ref="loginForm" class="login-Form">
+      <el-form :model="loginForm" ref="loginForm" status-icon :rules="rules" class="login-Form">
         <el-form-item prop="phone">
           <el-input placeholder="请输入手机号" v-model="loginForm.phone" prefix-icon="el-icon-user"></el-input>
         </el-form-item>
@@ -26,7 +26,7 @@
             <el-input placeholder="请输入验证码" v-model="loginForm.code" prefix-icon="el-icon-key"></el-input>
           </el-col>
           <el-col :span="7">
-            <img class="captcha" alt />
+            <img class="captcha" ref="captcha" :src="actions" @click="randomLoginCaptcha" alt />
           </el-col>
         </el-form-item>
 
@@ -50,6 +50,9 @@
   </div>
 </template>
 <script>
+// import axios from 'axios'
+import { login } from '@/api/login.js'
+import { setToken } from '@/utils/token.js'
 export default {
   name: "login",
   data() {
@@ -67,11 +70,12 @@ export default {
 
     return {
       loginForm: {
-        phone: "11233445",
-        password: "88888888",
+        phone: "18522222222",
+        password: "12345678",
         code: "1234",
         checked: false
       },
+      actions: process.env.VUE_APP_BASEURL+"/captcha?type=login",
       rules: {
         phone: [
           { required: true, message: "手机号不能为空" },
@@ -91,6 +95,30 @@ export default {
   methods: {
     submitForm(formName) {
       window.console.log(formName);
+      this.$refs[formName].validate(valid =>{
+        if(valid){
+          login(this.loginForm).then(res => {
+            window.console.log(res)
+            if(res.data.code == 200){
+              this.$message.success('登录成功');
+              setToken(res.data.data.token)
+              this.$router.push('/index')
+            }else {
+              this.$message.warning(res.data.message)
+              this.randomLoginCaptcha()
+            }
+          })
+        }else {
+          this.$message.warning('请检查输入的内容');
+          return false
+        }
+      })
+      
+    },
+    randomLoginCaptcha() {
+      // 时间戳
+      this.$refs.captcha.src = `http://127.0.0.1/heimamm/public/captcha?type=login&${Date.now()}`;
+      // 随机数
     }
   }
 };
