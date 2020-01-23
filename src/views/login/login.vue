@@ -26,7 +26,7 @@
             <el-input placeholder="请输入验证码" v-model="loginForm.code" prefix-icon="el-icon-key"></el-input>
           </el-col>
           <el-col :span="7">
-            <img class="captcha" ref="captcha" :src="actions" @click="randomLoginCaptcha" alt />
+            <img class="captcha"  :src="actions" @click="randomLoginCaptcha" alt />
           </el-col>
         </el-form-item>
 
@@ -117,7 +117,7 @@ export default {
     },
     randomLoginCaptcha() {
       // 时间戳
-      this.$refs.captcha.src = `http://127.0.0.1/heimamm/public/captcha?type=login&${Date.now()}`;
+      this.actions = `http://127.0.0.1/heimamm/public/captcha?type=login&${Date.now()}`;
       // 随机数
     }
   }
