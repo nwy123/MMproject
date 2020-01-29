@@ -8,6 +8,9 @@ import { Message } from 'element-ui'
 
 import { userInfo } from '@/api/user.js'
 import { getToken,removeToken } from '@/utils/token.js'
+import store from '../store/store'
+
+
 Vue.use(VueRouter)
 const router = new VueRouter({
     routes:[
@@ -29,28 +32,37 @@ const router = new VueRouter({
 const whitePaths = ['/login']
 // 增加导航守卫
 router.beforeEach((to,from,next)=>{
+    // 当要跳转到指定路由对象时才进入导航守卫判断条件
     if(!whitePaths.includes(to.path)){
     // if(to.push === '/index'){
         // 首页才需要判断token
+        // 未登录，跳转到登录页
         if(!getToken()){
             Message.error('必须登录才可以访问首页');
             return next("/login")
         }
         // token正确性判断
-        userInfo().then(res=>{
-            window.console.log(res)
-            if(res.data.code===0){
-                // token验证失效
-                Message.error("登录状态有误，请重新登录")
-                // 删除错误的token
-                removeToken()
-                // 跳转去登录页
-                next('/login')
-            }else{
-                // token验证成功
-                next()
-            }
-        })
+        // 已经登录了，进行ID判断,如果不存在用户信息则进行用户信息请求
+        if(!store.state.userInfo){
+            userInfo().then(res=>{
+                window.console.log(res)
+                if(res.data.code===0){
+                    // token验证失效
+                    Message.error("登录状态有误，请重新登录")
+                    // 删除错误的token
+                    removeToken()
+                    // 跳转去登录页
+                    next('/login')
+                }else{
+                    // token验证成功
+                    store.commit('setInfo',res.data.data)
+                    next()
+                }
+            })
+        }else {
+            next()
+        }
+       
       } else {
         // 放过去
         next();
