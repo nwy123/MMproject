@@ -26,7 +26,7 @@
             <el-input placeholder="请输入验证码" v-model="loginForm.code" prefix-icon="el-icon-key"></el-input>
           </el-col>
           <el-col :span="7">
-            <img class="captcha"  :src="actions" @click="randomLoginCaptcha" alt />
+            <img class="captcha" :src="actions" @click="randomLoginCaptcha" alt />
           </el-col>
         </el-form-item>
 
@@ -40,23 +40,88 @@
         </el-form-item>
         <el-form-item class="btn-box">
           <el-button type="primary" @click="submitForm('loginForm')">登录</el-button>
-          <el-button>注册</el-button>
+          <el-button @click="registerFormVisible=true">注册</el-button>
         </el-form-item>
       </el-form>
     </div>
     <div class="right">
       <img src="@/assets/login_bg.png" alt />
     </div>
+
+    <!-- 用户注册 -->
+
+    <el-dialog
+      title="用户注册"
+      class="register-dialog"
+      :visible.sync="registerFormVisible"
+      @closed="closedRegDialog"
+    >
+     
+      <el-form :model="regForm" :rules="rules" ref="regForm">
+         <el-form-item label="头像" :label-width="formLabelWidth" prop="avatar">
+            <el-upload
+        class="avatar-uploader"
+        :action="avatarAction"
+        :show-file-list="false"
+        :on-success="handleAvatarSuccess"
+        :before-upload="beforeAvatarUpload"
+        name="image"
+      >
+      <img v-if="imageUrl" :src="imageUrl" class="avatar" />
+        <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+        </el-upload>
+
+        <!-- 不知道 -->
+        <el-input v-model="regForm.avatar" type="hidden"></el-input>
+        </el-form-item>
+        <el-form-item label="昵称" :label-width="formLabelWidth" prop="username">
+          <el-input v-model="regForm.username" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="邮箱" :label-width="formLabelWidth" prop="email">
+          <el-input v-model="regForm.email" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="手机" :label-width="formLabelWidth" prop="phone">
+          <el-input v-model="regForm.phone" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="密码" :label-width="formLabelWidth" prop="password">
+          <el-input v-model="regForm.password" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="图形码" :label-width="formLabelWidth">
+          <el-row>
+          <el-col :span="16">
+            <el-input placeholder="请输入验证码" v-model="regForm.imgCode" prefix-icon="el-icon-key"></el-input>
+          </el-col>
+          <el-col :span="7" :offset="1">
+            <img class="captcha" :src="regActions" @click="randomRegCaptcha"  alt />
+          </el-col>
+          </el-row>
+        </el-form-item>
+        <el-form-item label="验证码" :label-width="formLabelWidth" prop="rcode">
+          <el-row>
+            <el-col :span="16">
+              <el-input v-model="regForm.rcode" autocomplete="off"></el-input>
+            </el-col>
+            <el-col :span="7" :offset="1">
+              <el-button @click="getPhoneCode" :disabled="delayTime !== 0">点击接收验证码{{ delayTime != 0 ? delayTime + "S" : "" }}</el-button>
+            </el-col>
+          </el-row>
+          
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="registerFormVisible = false">取 消</el-button>
+        <el-button type="primary" @click="submitRegForm">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 <script>
 // import axios from 'axios'
-import { login } from '@/api/login.js'
-import { setToken } from '@/utils/token.js'
+import { login,sendsms,register } from "@/api/login.js";
+import { setToken } from "@/utils/token.js";
 export default {
   name: "login",
   data() {
-   
     return {
       loginForm: {
         phone: "18522222222",
@@ -64,11 +129,19 @@ export default {
         code: "1234",
         checked: false
       },
-      actions: process.env.VUE_APP_BASEURL+"/captcha?type=login",
+      actions: process.env.VUE_APP_BASEURL + "/captcha?type=login",
       rules: {
+        // avatar:[
+        //   {required:true,message:'头像不能为空',trigger: "change"}
+        // ],
+        username: [{ required: true, message: "用户名不能为空" }],
         phone: [
           { required: true, message: "手机号不能为空" },
           { validator: this.checkPhone }
+        ],
+        email: [
+          { required: true, message: "邮箱号不能为空" },
+          { validator: this.checkEmail }
         ],
         password: [
           { required: true, message: "密码不能为空" },
@@ -78,17 +151,39 @@ export default {
           { required: true, message: "验证码不能为空" },
           { min: 4, max: 4, message: "验证码长度为4" }
         ],
-        checked:[
+        //短信验证码
+        rcode: [
+          { required: true, message: "短信验证码不能为空" },
+          { min: 4, max: 4, message: "短信验证长度为4" }
+        ],
+        checked: [
           { required: true, message: "协议必须勾选" },
-          {validator:this.checkAgree}
-         
+          { validator: this.checkAgree }
         ]
-      }
+      },
+      registerFormVisible: false,
+      formLabelWidth: "120px",
+      regForm: {
+        avatar:'',
+        username: "",
+        email: "",
+        phone: "",
+        password: "",
+        imgCode: "",
+        rcode: ""
+      },
+      imageUrl:'',
+      // 用户头像上传地址
+      avatarAction:process.env.VUE_APP_BASEURL + "/uploads",
+      // 注册图形码
+      regActions:process.env.VUE_APP_BASEURL + "/captcha?type=sendsms",
+      // 验证码倒计时
+      delayTime:0
     };
   },
   methods: {
     // 验证手机号
-     checkPhone :(rule, value, callback) => {
+    checkPhone: (rule, value, callback) => {
       // 正则
       const reg = /^(0|86|17951)?(13[0-9]|15[012356789]|166|17[3678]|18[0-9]|14[57])[0-9]{8}$/;
       // 正则验证
@@ -100,40 +195,129 @@ export default {
       callback();
     },
     // 验证协议勾选
-    checkAgree:(rule,value,callback)=>{
-      if(value == false){
-        return callback(new Error('必须勾选协议'))
+    checkAgree: (rule, value, callback) => {
+      if (value == false) {
+        return callback(new Error("必须勾选协议"));
       }
-      callback()
+      callback();
+    },
+    // 邮箱验证
+    checkEmail: (rules, value, callback) => {
+      var reg = /^[A-Za-zd0-9]+([-_.][A-Za-zd]+)*@([A-Za-zd]+[-.])+[A-Za-zd]{2,5}$/;
+      if (!reg.test(value)) {
+        return callback(new Error("请输入正确的邮箱"));
+      }
     },
     submitForm(formName) {
       window.console.log(formName);
-      this.$refs[formName].validate(valid =>{
-        if(valid){
+      this.$refs[formName].validate(valid => {
+        if (valid) {
           login(this.loginForm).then(res => {
-            window.console.log(res)
-            if(res.data.code == 200){
-              this.$message.success('登录成功');
-              setToken(res.data.data.token)
-              this.$router.push('/index')
-            }else {
-              this.$message.warning(res.data.message)
-              this.randomLoginCaptcha()
+            window.console.log(res);
+            if (res.data.code == 200) {
+              this.$message.success("登录成功");
+              setToken(res.data.data.token);
+              this.$router.push("/index");
+            } else {
+              this.$message.warning(res.data.message);
+              this.randomLoginCaptcha();
             }
-          })
-        }else {
-          this.$message.warning('请检查输入的内容');
-          return false
+          });
+        } else {
+          this.$message.warning("请检查输入的内容");
+          return false;
         }
-      })
-      
+      });
     },
+    // 登录验证码
     randomLoginCaptcha() {
       // 时间戳
       this.actions = `http://127.0.0.1/heimamm/public/captcha?type=login&${Date.now()}`;
       // 随机数
+    },
+
+    // 关闭注册框
+    closedRegDialog() {
+      this.$refs.regForm.resetFields();
+      this.regForm.imgCode = "";
+    },
+
+    // 注册验证码
+    randomRegCaptcha(){
+      this.regActions = `http://127.0.0.1/heimamm/public/captcha?type=sendsms&${Date.now()}`;
+    },
+    // 文件上传
+    handleAvatarSuccess(res, file) {
+        this.imageUrl = URL.createObjectURL(file.raw);
+      },
+      beforeAvatarUpload(file) {
+        const isJPG = file.type === 'image/jpeg';
+        const isLt2M = file.size / 1024 / 1024 < 2;
+
+        if (!isJPG) {
+          this.$message.error('上传头像图片只能是 JPG 格式!');
+        }
+        if (!isLt2M) {
+          this.$message.error('上传头像图片大小不能超过 2MB!');
+        }
+        return isJPG && isLt2M;
+      },
+
+      // 获取手机验证码
+      getPhoneCode(){
+        //图片验证码判断
+        if(this.regForm.imgCode.length !=4){
+          return this.$message.warning('验证码错误，请检查')
+        }
+        //手机号判断
+         const reg = /^(0|86|17951)?(13[0-9]|15[012356789]|166|17[3678]|18[0-9]|14[57])[0-9]{8}$/;
+      // 正则验证
+      if (!reg.test(this.regForm.phone)) {
+        // 错误提示
+        return this.$message.warning('手机号不对')
+      }
+      if(this.delayTime == 0){
+        this.delayTime = 60;
+        let timer = setInterval(()=>{
+          this.delayTime --;
+          if(this.delayTime == 0){
+            clearInterval(timer)
+          }
+        },100)
+
+        //调用短信接口
+        sendsms({
+          code:this.regForm.imgCode,
+          phone:this.regForm.phone
+        }).then(res=>{
+          window.console.log(res)
+          if(res.data.code == 200){
+            this.$message.info("短信验证码是:" + res.data.data.captcha)
+          }else {
+            this.$message.warning(res.data.message)
+          }
+        })
+      }
+      },
+
+
+      //点击注册
+      submitRegForm(){
+        this.$refs.regForm.validate(valid => {
+          if(valid){
+            // 注册接口
+            register(this.regForm).then(res =>{
+              window.console.log(res)
+            })
+
+          }else {
+            this.$message.warning('请检查输入的内容')
+            return false
+          }
+        })
+      }
     }
-  }
+  
 };
 </script>
 
@@ -193,6 +377,52 @@ export default {
           margin-bottom: 28px;
         }
       }
+    }
+  }
+  .register-dialog {
+    .el-dialog {
+      width: 600px;
+    }
+    .el-dialog__header {
+      background: linear-gradient(
+        right,
+        rgba(1, 198, 250, 1),
+        rgba(20, 147, 250, 1)
+      );
+      text-align: center;
+      .el-dialog__title {
+        color: white;
+      }
+    }
+    .captcha {
+      width: 100%
+    }
+    .avatar-uploader {
+      display: flex;
+      justify-content: center;
+    }
+    .avatar-uploader .el-upload {
+      border: 1px dashed #d9d9d9;
+      border-radius: 6px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+    .avatar-uploader .el-upload:hover {
+      border-color: #409eff;
+    }
+    .avatar-uploader-icon {
+      font-size: 28px;
+      color: #8c939d;
+      width: 178px;
+      height: 178px;
+      line-height: 178px;
+      text-align: center;
+    }
+    .avatar {
+      width: 178px;
+      height: 178px;
+      display: block;
     }
   }
 }
