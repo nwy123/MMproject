@@ -18,7 +18,11 @@ const router = new VueRouter({
         {
             path:'/index',
             component:index
-        }
+        },
+        {
+            path:'*',
+            redirect:'/login'
+         }
     ]
 })
 // 地址白名单

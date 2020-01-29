@@ -5,7 +5,7 @@ export function userInfo(){
         url:"/info",
         method:"get",
         headers:{
-            Authorization:getToken()
+            token:getToken()
         }
     })
 }
