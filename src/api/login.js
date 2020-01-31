@@ -15,6 +15,7 @@ export function sendsms(data){
         data
     })
 }
+// 注册接口
 export function register(data){
     return request({
         url:'/register',

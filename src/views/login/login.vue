@@ -110,7 +110,7 @@
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="registerFormVisible = false">取 消</el-button>
-        <el-button type="primary" @click="submitRegForm">确 定</el-button>
+        <el-button type="primary" @click="submitRegForm('regForm')">确 定</el-button>
       </div>
     </el-dialog>
   </div>
@@ -131,9 +131,9 @@ export default {
       },
       actions: process.env.VUE_APP_BASEURL + "/captcha?type=login",
       rules: {
-        // avatar:[
-        //   {required:true,message:'头像不能为空',trigger: "change"}
-        // ],
+        avatar:[
+          {required:true,message:'头像不能为空',trigger: "change"}
+        ],
         username: [{ required: true, message: "用户名不能为空" }],
         phone: [
           { required: true, message: "手机号不能为空" },
@@ -165,10 +165,10 @@ export default {
       formLabelWidth: "120px",
       regForm: {
         avatar:'',
-        username: "",
-        email: "",
-        phone: "",
-        password: "",
+        username: "nny",
+        email: "1094616318@qq.com",
+        phone: "15172873131",
+        password: "nny3130",
         imgCode: "",
         rcode: ""
       },
@@ -248,7 +248,10 @@ export default {
     },
     // 文件上传
     handleAvatarSuccess(res, file) {
+      window.console.log(res);
         this.imageUrl = URL.createObjectURL(file.raw);
+        // 准备提交的数据
+      this.regForm.avatar = res.data.file_path;
       },
       beforeAvatarUpload(file) {
         const isJPG = file.type === 'image/jpeg';
@@ -302,12 +305,22 @@ export default {
 
 
       //点击注册
-      submitRegForm(){
-        this.$refs.regForm.validate(valid => {
+      submitRegForm(formName){
+        window.console.log(111)
+        this.$refs[formName].validate(valid => {
           if(valid){
-            // 注册接口
+            // 注册接口、
+            window.console.log('注册成功')
             register(this.regForm).then(res =>{
               window.console.log(res)
+              if (res.data.code === 200) {
+              // 头像也要清空哦
+              this.imageUrl = "";
+              // 关闭弹框
+              this.registerFormVisible = false;
+              // 提示用户
+              this.$message.success("注册成功")
+            }
             })
 
           }else {
