@@ -23,3 +23,12 @@ export function register(data){
         data
     })
 }
+
+// 退出登录接口
+export function logout(){
+    return request({
+        url:'/logout',
+        method:'get'
+        
+    })
+}
