@@ -286,7 +286,7 @@ export default {
         this.$refs[formName].validate(valid => {
           if(valid){
             // 注册接口、
-            window.console.log('注册成功')
+            // window.console.log('注册成功')
             register(this.regForm).then(res =>{
               window.console.log(res)
               if (res.data.code === 200) {

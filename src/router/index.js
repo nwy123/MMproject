@@ -46,7 +46,7 @@ router.beforeEach((to, from, next) => {
         if (!store.state.userInfo) {
             userInfo().then(res => {
                 window.console.log(res)
-                if (res.data.code === 0) {
+                if (res.data.code === 206) {
                     // token验证失效
                     Message.error("登录状态有误，请重新登录")
                     // 删除错误的token

@@ -19,7 +19,8 @@
   </el-container>
 </template>
 <script>
-import {logout} from '@/api/request.js'
+import { logout } from '@/api/login.js'
+import { removeToken } from '@/utils/token.js'
 export default {
     computed:{
         userinfo(){
@@ -35,6 +36,14 @@ export default {
         }).then(() => {
             logout().then(res =>{
                 window.console.log(res)
+                 if (res.code === 200) {
+              // 删除token
+              removeToken();
+              // 删除用户信息
+              this.$store.commit("setInfo", undefined);
+              // 跳转去登录页
+              this.$router.push("/login");
+            }
             })
         //   this.$message({
         //     type: 'success',

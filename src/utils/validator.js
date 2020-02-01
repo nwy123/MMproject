@@ -24,6 +24,7 @@ export function  checkPhone (rule, value,  callback) {
         if (!reg.test(value)) {
           return callback(new Error("请输入正确的邮箱"));
         }
-        callback()
+        //正确提示
+        callback();
 
       }

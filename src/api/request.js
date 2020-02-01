@@ -2,8 +2,12 @@ import axios from 'axios'
 
 // 导入仓库
 import store from '@/store/store.js'
+
 // token
 import { getToken } from '@/utils/token.js'
+
+// 导入Element-ui的弹框
+// import { Message } from "element-ui";
 const request = axios.create({
     
     baseURL:process.env.VUE_APP_BASEURL,
@@ -13,7 +17,7 @@ const request = axios.create({
 
 // 拦截器
 // 请求拦截器
-request.interceptors.request.use(
+axios.interceptors.request.use(
     config => {
         if(store.state.userInfo){
             //如果有用户信息，就携带token
@@ -28,7 +32,8 @@ request.interceptors.request.use(
 )
 
 // 响应拦截器
-request.interceptors.response.use(response => {
+axios.interceptors.response.use(response => {
+   
     return response
 },error => {
     return Promise.reject(error)
