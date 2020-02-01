@@ -4,8 +4,9 @@ import axios from 'axios'
 import store from '@/store/store.js'
 
 // token
-import { getToken } from '@/utils/token.js'
-
+import { getToken,removeToken } from '@/utils/token.js'
+// 导入路由
+import router from "@/router/index.js";
 // 导入Element-ui的弹框
 // import { Message } from "element-ui";
 const request = axios.create({
@@ -33,8 +34,14 @@ axios.interceptors.request.use(
 
 // 响应拦截器
 axios.interceptors.response.use(response => {
-   
-    return response
+    if (response.data.code === 206) {
+        
+        // 移除token
+        removeToken();
+        // 去登录页
+        router.push("/login");
+      }
+    return response.data
 },error => {
     return Promise.reject(error)
 }

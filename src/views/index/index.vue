@@ -36,7 +36,7 @@ export default {
         }).then(() => {
             logout().then(res =>{
                 window.console.log(res)
-                 if (res.code === 200) {
+                 if (res.data.code === 200) {
               // 删除token
               removeToken();
               // 删除用户信息
