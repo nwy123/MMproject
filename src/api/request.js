@@ -1,14 +1,11 @@
 import axios from 'axios'
 
-// 导入仓库
-import store from '@/store/store.js'
-
+// // 导入仓库
+// import store from '@/store/store.js'
 // token
 import { getToken,removeToken } from '@/utils/token.js'
-// 导入路由
-import router from "@/router/index.js";
-// 导入Element-ui的弹框
-// import { Message } from "element-ui";
+import { Message } from 'element-ui'
+import router from '../router'
 const request = axios.create({
     
     baseURL:process.env.VUE_APP_BASEURL,
@@ -18,9 +15,9 @@ const request = axios.create({
 
 // 拦截器
 // 请求拦截器
-axios.interceptors.request.use(
+request.interceptors.request.use(
     config => {
-        if(store.state.userInfo){
+        if(getToken()){
             //如果有用户信息，就携带token
             config.headers.token = getToken()
         }
@@ -33,15 +30,15 @@ axios.interceptors.request.use(
 )
 
 // 响应拦截器
-axios.interceptors.response.use(response => {
-    if (response.data.code === 206) {
-        
-        // 移除token
-        removeToken();
-        // 去登录页
-        router.push("/login");
-      }
-    return response.data
+request.interceptors.response.use(response => {
+    if(response.data.code === 206){
+        //提示用户
+        Message.warning(response.data.message);
+        //移除token
+        removeToken()
+        router.push('/login')
+    }
+    return response
 },error => {
     return Promise.reject(error)
 }

@@ -57,7 +57,7 @@
       @closed="closedRegDialog"
     >
      
-      <el-form :model="regForm" :rules="rules" ref="regForm">
+      <el-form :model="regForm" :rules="rules"  ref="regForm">
          <el-form-item label="头像" :label-width="formLabelWidth" prop="avatar">
             <el-upload
         class="avatar-uploader"

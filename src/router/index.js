@@ -2,31 +2,32 @@ import Vue from 'vue'
 // import router from 'vue-router'
 import VueRouter from 'vue-router'
 
-import login from '@/views/login/login'
-import index from '@/views/index/index'
+// import login from '@/views/login/login'
+// import index from '@/views/index/index'
 import { Message } from 'element-ui'
 
 import { userInfo } from '@/api/user.js'
 import { getToken, removeToken } from '@/utils/token.js'
 import store from '../store/store'
 
-
+import routes from '@/router/router.js'
 Vue.use(VueRouter)
 const router = new VueRouter({
-    routes: [
-        {
-            path: '/login',
-            component: login
-        },
-        {
-            path: '/index',
-            component: index
-        },
-        {
-            path: '/',
-            redirect: '/login'
-        }
-    ]
+    routes
+        // {
+        //     path: '/login',
+        //     component: login
+        // },
+        // {
+        //     path: '/index',
+        //     component: index
+        // },
+        // {
+        //     path: '/',
+        //     redirect: '/login'
+        // }
+        
+    
 })
 // 地址白名单
 const whitePaths = ['/login']

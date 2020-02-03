@@ -2,7 +2,7 @@
   <el-container>
     <el-header>
       <div class="left">
-        <i class="icon el-icon-s-operation"></i>
+        <i class="icon el-icon-s-operation" @click="isCollapse = !isCollapse"></i>
         <img src="@/assets/index_icon.png" alt />
         <span class="title">黑马面面</span>
       </div>
@@ -13,51 +13,107 @@
       </div>
     </el-header>
     <el-container>
-      <el-aside width="200px">Aside</el-aside>
-      <el-main>Main</el-main>
+      <el-aside width="200px">
+        <el-menu
+      default-active="2"
+      class="el-menu-vertical-demo"
+      :collapse="isCollapse"
+      router
+      >
+      
+        <template >
+         <el-menu-item index="/index/subject">
+        <i class="el-icon-menu"></i>
+        <span slot="title">数据概况</span>
+      </el-menu-item>
+      <el-menu-item index="/index/subject" >
+        <i class="el-icon-document"></i>
+        <span slot="title">用户列表</span>
+      </el-menu-item>
+      <el-menu-item index="/index/enterprise">
+        <i class="el-icon-setting"></i>
+        <span slot="title">题库列表</span>
+      </el-menu-item>
+      <el-menu-item index="/index/subject">
+        <i class="el-icon-setting"></i>
+        <span slot="title">企业列表</span>
+      </el-menu-item>
+      <el-menu-item index="/index/subject">
+        <i class="el-icon-setting"></i>
+        <span slot="title">学科列表</span>
+      </el-menu-item>
+      <el-menu-item index="/index/enterprise">
+        <i class="el-icon-setting"></i>
+        <span slot="title">参加测试</span>
+      </el-menu-item>
+        </template>
+    </el-menu>
+      </el-aside>
+      <el-main>
+        <router-view></router-view>
+      </el-main>
     </el-container>
   </el-container>
 </template>
 <script>
-import { logout } from '@/api/login.js'
+import { logout } from "@/api/login.js";
 import { removeToken } from '@/utils/token.js'
+import routes from '@/router/router.js'
 export default {
-    computed:{
-        userinfo(){
-            return this.$store.state.userInfo
-        }
+  name:'index',
+  data() {
+      return {
+        isCollapse:false,
+        routes
+      }
     },
-    methods:{
-        logout(){
-           this.$confirm('是否确认退出登录', '提示', {
+    
+  computed: {
+    
+    userinfo() {
+      return this.$store.state.userInfo;
+    }
+  },
+  methods: {
+  
+  logout() {
+    window.console.log(this.$store.state.userInfo);
+        this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
-            logout().then(res =>{
-                window.console.log(res)
-                 if (res.data.code === 200) {
-              // 删除token
-              removeToken();
-              // 删除用户信息
-              this.$store.commit("setInfo", undefined);
-              // 跳转去登录页
-              this.$router.push("/login");
-            }
+         
+          logout().then(res => {
+            window.console.log(res);
+            // this.$store.state.userInfo=''
+         if(res.data.code == 200){
+
+
+           this.$message({
+              type:'success',
+              message:'退出成功'
             })
-        //   this.$message({
-        //     type: 'success',
-        //     message: '成功退出'
-        //   });
+           removeToken();
+           this.$store.commit('setInfo',undefined)
+           this.$router.push('/login')
+         }
+            
+            
+            
+          });
         }).catch(() => {
           this.$message({
             type: 'info',
-            message: '已取消退出'
+            message: '已取消删除'
           });          
         });
-    }
-}
-}
+      }
+    },
+    beforeCreate() {
+      window.console.log(this.$store.state.userInfo);
+    },
+};
 </script>
 <style lang="less">
 .el-container {
