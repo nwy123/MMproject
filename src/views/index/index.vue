@@ -34,7 +34,7 @@
         <i class="el-icon-setting"></i>
         <span slot="title">题库列表</span>
       </el-menu-item>
-      <el-menu-item index="/index/subject">
+      <el-menu-item index="/index/enterprise">
         <i class="el-icon-setting"></i>
         <span slot="title">企业列表</span>
       </el-menu-item>

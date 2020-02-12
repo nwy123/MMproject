@@ -25,6 +25,7 @@ export default [
                 path:'enterprise',
                 component:enterprise
             }
+            
         ]
     }
     

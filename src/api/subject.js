@@ -18,7 +18,7 @@ export function subjectAdd(data){
     })
 }
 
-//学科状态
+//修改状态
 
 export function subjuecStatus(data){
     return request({
