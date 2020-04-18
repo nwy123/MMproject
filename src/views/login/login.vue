@@ -3,7 +3,7 @@
     <div class="left">
       <div class="desc-box">
         <img src="@/assets/login_icon.png" alt />
-        <span class="title">黑马面面</span>
+        <span class="title">面面project</span>
         <span class="line"></span>
         <span class="sub_title">用户登录</span>
       </div>
