@@ -4,7 +4,7 @@
       <div class="left">
         <i class="icon el-icon-s-operation" @click="isCollapse = !isCollapse"></i>
         <img src="@/assets/index_icon.png" alt />
-        <span class="title">黑马面面</span>
+        <span class="title">面面project</span>
       </div>
       <div class="right">
         <img :src="userinfo.avatar" alt />
